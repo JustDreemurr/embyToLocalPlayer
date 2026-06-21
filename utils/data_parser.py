@@ -226,7 +226,6 @@ def parse_received_data_emby(received_data):
                 
                 # Map the rank to the valid indices probed
                 correct_idx = valid_indices[rank] if rank < len(valid_indices) else valid_indices[0]
-                logger.info(f"Probed correct subtitle indices: {valid_indices}, mapped original Index {original_idx} (Rank {rank}) to {correct_idx}")
                 return base_url.replace(f'/{original_idx}/0/Stream', f'/{correct_idx}/0/Stream')
 
             original_idx = sub_dict.get("Index", sub_index)
