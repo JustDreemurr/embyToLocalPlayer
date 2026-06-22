@@ -226,7 +226,18 @@ def parse_received_data_emby(received_data):
                 
                 # Map the rank to the valid indices probed
                 correct_idx = valid_indices[rank] if rank < len(valid_indices) else valid_indices[0]
-                return base_url.replace(f'/{original_idx}/0/Stream', f'/{correct_idx}/0/Stream')
+                new_url = base_url.replace(f'/{original_idx}/0/Stream', f'/{correct_idx}/0/Stream')
+                
+                # Fix the codec extension using main_ep_info to prevent Emby from transcoding ass to vtt
+                true_streams = main_ep_info.get('MediaStreams', [])
+                correct_stream = next((s for s in true_streams if s.get('Index') == correct_idx), {})
+                true_codec = correct_stream.get('Codec')
+                if true_codec:
+                    import re
+                    new_url = re.sub(r'/Stream\.\w+', f'/Stream.{true_codec}', new_url)
+                
+                # logger.info(f"Probed correct subtitle indices: {valid_indices}, mapped original Index {original_idx} (Rank {rank}) to {correct_idx} with URL {new_url}")
+                return new_url
 
             original_idx = sub_dict.get("Index", sub_index)
             sub_delivery_url = probe_subtitle_url(sub_delivery_url, original_idx)
